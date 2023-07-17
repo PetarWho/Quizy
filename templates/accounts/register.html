@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mb-5">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title text-center heading">Register</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.username.id_for_label }}">Username:</label>
+                                {{ form.username }}
+                                {{ form.username.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.first_name.id_for_label }}">First
+                                    Name:</label>
+                                {{ form.first_name }}
+                                {{ form.first_name.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.last_name.id_for_label }}">Last Name:</label>
+                                {{ form.last_name }}
+                                {{ form.last_name.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.email.id_for_label }}">Email:</label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.age.id_for_label }}">Age:</label>
+                                {{ form.age }}
+                                {{ form.age.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.password1.id_for_label }}">Password:</label>
+                                {{ form.password1 }}
+                                {{ form.password1.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="acc-form-label" for="{{ form.password2.id_for_label }}">Confirm
+                                    Password:</label>
+                                {{ form.password2 }}
+                                {{ form.password2.errors }}
+                            </div>
+                            <div class="d-flex justify-content-center mt-3">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

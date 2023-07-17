@@ -1,0 +1,16 @@
+/* Account Register Error */
+.errorlist{
+    color:red;
+    list-style: none;
+}
+
+.acc-form-label{
+    display: block;
+    font-weight: normal;
+    margin:10px 0 1px 5px;
+}
+
+.heading{
+    font-size: 2.2rem;
+    font-weight: bolder;
+}
