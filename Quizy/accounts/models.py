@@ -27,4 +27,6 @@ class AppUser(AbstractUser):
     email = models.EmailField(unique=True)
     photo = models.URLField(null=True, blank=True, default="https://lh3.googleusercontent.com/d/1EKocllv5JV28xZSDmSOyioXSY_Uasm1r")
 
+    def __str__(self):
+        return self.username
 

@@ -1,5 +1,6 @@
 from django.db import models
 from Quizy.accounts.models import AppUser
+from django.contrib.auth import get_user_model
 
 
 class Category(models.Model):
@@ -24,13 +25,14 @@ class Question(models.Model):
 
 
 class Quiz(models.Model):
-    user = models.ForeignKey(AppUser, on_delete=models.CASCADE)
+    name = models.CharField(max_length=30, blank=False, null=False)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    answered_questions = models.ManyToManyField(Question)
+    questions = models.ManyToManyField(Question)
     image_url = models.URLField()
 
     def __str__(self):
-        return f"Quiz by {self.user.username} on {self.category.name}"
+        return f"{self.category.name} quiz by {self.user}."
 
 
 class Score(models.Model):

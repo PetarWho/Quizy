@@ -14,6 +14,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'add_question' %}">Add Question</a>
                 </li>
+                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_quiz' %}">Add Quiz</a>
+                </li>
             {% endif %}
 
             <li class="nav-item">
@@ -21,6 +24,9 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'list_question' %}">Questions</a>
+            </li>
+        <li class="nav-item">
+                <a class="nav-link" href="{% url 'list_quiz' %}">Quizzes</a>
             </li>
         </ul>
         <ul class="navbar-nav">
