@@ -1,12 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
 from .models import Category, Question, Quiz
 from .forms import CategoryForm, QuestionForm, QuizForm
+from ..common.models import QuizHistory, HighScore
 
 
 def category_list(request):
@@ -108,3 +109,38 @@ def get_questions(request):
         data = [{'id': question.id, 'question_text': question.question_text} for question in questions]
         return JsonResponse(data, safe=False)
     return JsonResponse([], safe=False)
+
+
+def quiz_view(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    questions = quiz.questions.all()
+    user_answers = []  # List to store the user's answers for each question
+
+    if request.method == 'POST':
+        for question in questions:
+            question_id = question.id
+            user_answer = request.POST.get(f'{question_id}_user_answer')
+
+            # Append the user's answer to the list
+            user_answers.append(user_answer)
+
+        # If all questions are answered, calculate the score
+        if len(user_answers) == questions.count():
+            score = 0
+            for question, user_answer in zip(questions, user_answers):
+                correct_answer = question.correct_answer
+                if user_answer == correct_answer:
+                    score += 1
+
+            # Check if the user's score is higher than the current high score
+            high_score, _ = HighScore.objects.get_or_create(user=request.user, quiz=quiz)
+            best = False
+            if score > high_score.score:
+                high_score.score = score
+                high_score.save()
+                best = True
+
+            # Display the score
+            return render(request, 'quizzes/quiz/quiz_result.html', {'score': score, 'quiz': quiz, 'best': best})
+
+    return render(request, 'quizzes/quiz/quizzing.html', {'questions': questions, 'quiz': quiz})

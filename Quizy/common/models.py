@@ -6,7 +6,7 @@ from Quizy.quizzes.models import Quiz, Category
 class HighScore(models.Model):
     user = models.ForeignKey(AppUser, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    score = models.IntegerField()
+    score = models.IntegerField(default=0)
 
     class Meta:
         unique_together = (("user", "quiz"),)

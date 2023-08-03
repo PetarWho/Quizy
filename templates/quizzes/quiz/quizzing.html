@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mb-5">
+        <h1 class="text-center my-4">{{ quiz.name }}</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for question in questions %}
+                        <h3>{{ forloop.counter }}. {{ question.question_text }}</h3>
+                        <input type="hidden" name="question_id" value="{{ question.id }}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}_user_answer"
+                                   value="{{ question.option1 }}" id="{{ question.id }}_option1">
+                            <label class="form-check-label" for="{{ question.id }}_option1">
+                                {{ question.option1 }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}_user_answer"
+                                   value="{{ question.option2 }}" id="{{ question.id }}_option2">
+                            <label class="form-check-label" for="{{ question.id }}_option2">
+                                {{ question.option2 }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}_user_answer"
+                                   value="{{ question.option3 }}" id="{{ question.id }}_option3">
+                            <label class="form-check-label" for="{{ question.id }}_option3">
+                                {{ question.option3 }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}_user_answer"
+                                   value="{{ question.option4 }}" id="{{ question.id }}_option4">
+                            <label class="form-check-label" for="{{ question.id }}_option4">
+                                {{ question.option4 }}
+                            </label>
+                        </div>
+                        <hr>
+                    {% endfor %}
+                    <input type="submit" value="Submit" class="btn btn-primary mt-3">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

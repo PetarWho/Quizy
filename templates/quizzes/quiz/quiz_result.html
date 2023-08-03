@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="text-center">
+        <p class="h2">You Scored <span class="bold">{{ score }}</span> on <span class="bold">{{ quiz }}</span>
+        </p>
+        {% if best %}
+            <p class="h2 bold color-gold">
+                This is your highest score. Congratulations!
+            </p>
+        {% endif %}
+        <img style="max-width: 20%; margin-top: 20px;" src="{% static 'img/result.png' %}" alt="result-img">
+
+    </div>
+
+{% endblock %}

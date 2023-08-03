@@ -7,15 +7,18 @@
     </button>
     <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
         <ul class="navbar-nav">
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_category' %}">Category add</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_question' %}">Add Question</a>
-                </li>
-                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_quiz' %}">Add Quiz</a>
+            {% if user.is_staff %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminPanelDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Admin Panel
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="adminPanelDropdown">
+                        <a class="dropdown-item" href="{% url 'add_category' %}">Add Category</a>
+                        <a class="dropdown-item" href="{% url 'add_question' %}">Add Question</a>
+                        <a class="dropdown-item" href="{% url 'list_question' %}">Questions</a>
+                        <a class="dropdown-item" href="{% url 'add_quiz' %}">Add Quiz</a>
+                    </div>
                 </li>
             {% endif %}
 
@@ -23,9 +26,6 @@
                 <a class="nav-link" href="{% url 'list_category' %}">Categories</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'list_question' %}">Questions</a>
-            </li>
-        <li class="nav-item">
                 <a class="nav-link" href="{% url 'list_quiz' %}">Quizzes</a>
             </li>
         </ul>

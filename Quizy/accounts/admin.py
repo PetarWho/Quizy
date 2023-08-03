@@ -1,3 +1,4 @@
 from django.contrib import admin
+from Quizy.accounts.models import AppUser
 
-# Register your models here.
+admin.site.register(AppUser)

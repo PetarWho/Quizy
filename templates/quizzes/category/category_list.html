@@ -7,12 +7,14 @@
             {% for category in page_obj %}
                 <div class="col-md-3 mb-4">
                     <div class="card d-flex justify-content-center">
-                        <div>
-                            <img src="{{ category.image_url }}" class="card-img-top p-1" alt="{{ category.name }}">
-                        </div>
-                        <div class="card-body m-0">
-                            <p class="card-title h4 text-center m-0">{{ category.name }}</p>
-                        </div>
+                        <a class="nav-link" href="{% url 'list_quiz' %}?category={{ category.pk }}">
+                            <div>
+                                <img src="{{ category.image_url }}" class="card-img-top p-1" alt="{{ category.name }}">
+                            </div>
+                            <div class="card-body m-0">
+                                <p class="card-title h4 text-center m-0">{{ category.name }}</p>
+                            </div>
+                        </a>
                     </div>
                 </div>
             {% endfor %}

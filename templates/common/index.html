@@ -1,8 +1,68 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <main>
-        <h1>Welcome to Quizy App!</h1>
-        <p>Start your quiz journey and test your knowledge.</p>
-    </main>
+    <div class="text-center">
+        <h2>Welcome to Quizy!</h2>
+        <p class="h4">Ready to start your first quiz? Choose a category and test your knowledge!</p>
+    </div>
+    <hr>
+    <div id="carouselCategories" class="carousel slide text-center" data-ride="carousel">
+        <!-- Indicators -->
+        <ol class="carousel-indicators">
+            {% for category in categories %}
+                <li data-target="#carouselCategories" data-slide-to="{{ forloop.counter0 }}"
+                    {% if forloop.first %}class="active"{% endif %}></li>
+            {% endfor %}
+        </ol>
+
+        <!-- Slides -->
+        <div class="carousel-inner">
+            {% for category in categories %}
+                {% if forloop.counter0|divisibleby:3 %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <div class="row">
+                {% endif %}
+
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <a class="nav-link" href="{% url 'list_quiz' %}?category={{ category.id }}">
+                        <img src="{{ category.image_url }}" class="card-img-top" alt="{{ category.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                    </div>
+                    </a>
+
+                </div>
+            </div>
+
+            {% if forloop.counter|divisibleby:3 or forloop.last %}
+                </div>
+                </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Navigation arrows -->
+        <a class="carousel-control-prev" href="#carouselCategories" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next text-secondary" href="#carouselCategories" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Activate the carousel
+            $("#carouselCategories").carousel();
+
+            // Set the carousel to automatically slide every 2 seconds
+            setInterval(function () {
+                $("#carouselCategories").carousel("next");
+            }, 2000);
+        });
+    </script>
 {% endblock %}

@@ -15,19 +15,22 @@
 
         <div class="row">
             {% for quiz in page_obj %}
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <p class="card-title h5">{{ quiz.name }} <span class="text-secondary h6">by</span> {{ quiz.user }}</p>
-                            <img src="{{ quiz.image_url }}" class="card-img-top p-1" alt="Quiz Image">
-                            <div class="text-right mt-2">
+                <a class="nav-link" href="{% url 'start_quiz' quiz_id=quiz.pk %}">
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-title h5">{{ quiz.name }} <span
+                                        class="text-secondary h6">by</span> {{ quiz.user }}</p>
+                                <img src="{{ quiz.image_url }}" class="card-img-top p-1" alt="Quiz Image">
+                                <div class="text-right mt-2">
                                 <span class="badge badge-info">
                                     {{ quiz.questions.count }} Questions
                                 </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             {% endfor %}
         </div>
 
@@ -35,10 +38,12 @@
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}">First</a>
+                        <a class="page-link"
+                           href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}">First</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
+                        <a class="page-link" href="?page=
+                                {{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
                     </li>
                 {% endif %}
 
@@ -49,17 +54,20 @@
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ i }}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ i }}</a>
+                            <a class="page-link" href="?page=
+                                    {{ i }}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ i }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
 
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
+                        <a class="page-link" href="?page=
+                                {{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Last</a>
+                        <a class="page-link" href="?page=
+                                {{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Last</a>
                     </li>
                 {% endif %}
             </ul>
