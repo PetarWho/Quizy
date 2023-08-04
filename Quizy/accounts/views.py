@@ -52,6 +52,7 @@ class UserLoginView(UserPassesTestMixin, LoginView):
         login(self.request, user)
         return super().form_valid(form)
 
+
 class LogoutView(View):
     def get(self, request, *args, **kwargs):
         logout(request)

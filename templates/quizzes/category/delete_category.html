@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p class="h1">Confirm Deletion</p>
+    <p>Are you sure you want to delete the category "{{ object.name }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-danger" value="Delete">
+        <a href="{% url 'list_category' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

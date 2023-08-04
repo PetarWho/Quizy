@@ -14,3 +14,24 @@
     font-size: 2.2rem;
     font-weight: bolder;
 }
+
+.admin-btn{
+    color:red !important;
+    font-weight: bold;
+}
+.admin-btn:hover{
+    color:yellow !important;
+}
+
+.brand{
+    text-decoration: none !important;
+    color:white;
+    font-weight: bold;
+    font-size: 2rem;
+    padding-bottom: 10px;
+    margin: 0 15px 0 0;
+}
+
+.brand:hover{
+    color:darkgrey;
+}

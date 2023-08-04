@@ -7,12 +7,16 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     image_url = models.URLField()
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
     def __str__(self):
         return self.name
 
 
 class Question(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    user = models.ForeignKey(AppUser, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=255)
     option1 = models.CharField(max_length=255, blank=True, null=True)
     option2 = models.CharField(max_length=255, blank=True, null=True)
@@ -30,6 +34,9 @@ class Quiz(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     questions = models.ManyToManyField(Question)
     image_url = models.URLField()
+
+    class Meta:
+        verbose_name_plural = "Quizzes"
 
     def __str__(self):
         return f"{self.category.name} quiz by {self.user}"

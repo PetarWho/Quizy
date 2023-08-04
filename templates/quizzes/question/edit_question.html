@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mb-5">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title text-center heading">Add Question</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.category.id_for_label }}">Category:</label>
+                                {{ form.category }}
+                                {{ form.category.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.question_text.id_for_label }}">Question Text:</label>
+                                {{ form.question_text }}
+                                {{ form.question_text.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.option1.id_for_label }}">Option 1:</label>
+                                {{ form.option1 }}
+                                {{ form.option1.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.option2.id_for_label }}">Option 2:</label>
+                                {{ form.option2 }}
+                                {{ form.option2.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.option3.id_for_label }}">Option 3:</label>
+                                {{ form.option3 }}
+                                {{ form.option3.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.option4.id_for_label }}">Option 4:</label>
+                                {{ form.option4 }}
+                                {{ form.option4.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.correct_answer.id_for_label }}">Correct Answer:</label>
+                                {{ form.correct_answer }}
+                                {{ form.correct_answer.errors }}
+                            </div>
+                            <div class="d-flex justify-content-center mt-3">
+                                <button type="submit" class="btn btn-primary btn-block">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,13 +1,17 @@
+import datetime
+
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.utils.decorators import method_decorator
+from django.views.generic import CreateView, DeleteView
 
 from .models import Category, Question, Quiz
 from .forms import CategoryForm, QuestionForm, QuizForm
 from ..common.models import QuizHistory, HighScore
+from ..core.view_decorators import is_superuser, is_staff, is_authenticated, is_staff_or_creator_question
 
 
 def category_list(request):
@@ -20,6 +24,7 @@ def category_list(request):
     return render(request, 'quizzes/category/category_list.html', {'page_obj': page_obj})
 
 
+@method_decorator(user_passes_test(is_staff), name='dispatch')
 class CategoryCreateView(LoginRequiredMixin, CreateView):
     model = Category
     form_class = CategoryForm
@@ -27,8 +32,34 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('list_category')
 
 
+@user_passes_test(is_staff)
+def edit_category(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('list_category')
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(request, 'quizzes/category/edit_category.html', {'form': form})
+
+
+@method_decorator(user_passes_test(is_superuser), name='dispatch')
+class CategoryDeleteView(DeleteView):
+    model = Category
+    template_name = 'quizzes/category/delete_category.html'
+    success_url = reverse_lazy('list_category')
+
+
+@user_passes_test(is_authenticated)
 def question_list(request):
-    questions = Question.objects.all()
+    if request.user.is_staff:
+        questions = Question.objects.order_by('-pk')
+    else:
+        questions = Question.objects.filter(user_id=request.user.id)
 
     selected_category = request.GET.get('category')
     if selected_category:
@@ -47,10 +78,40 @@ def question_list(request):
     })
 
 
+@method_decorator(user_passes_test(is_authenticated), name='dispatch')
 class QuestionCreateView(LoginRequiredMixin, CreateView):
     model = Question
     form_class = QuestionForm
     template_name = 'quizzes/question/add_question.html'
+    success_url = reverse_lazy('list_question')
+
+    def form_valid(self, form):
+        question = form.save(commit=False)
+        question.user_id = self.request.user.id
+        question.save()
+        return super().form_valid(form)
+
+
+def edit_question(request, question_id):
+    try:
+        question = Question.objects.get(pk=question_id, user_id=request.user.id)
+    except Question.DoesNotExist:
+        return redirect('list_question')
+    if request.method == 'POST':
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            return redirect('list_question')
+    else:
+        form = QuestionForm(instance=question)
+
+    return render(request, 'quizzes/question/edit_question.html', {'form': form})
+
+
+@method_decorator(user_passes_test(is_superuser), name='dispatch')
+class QuestionDeleteView(DeleteView):
+    model = Question
+    template_name = 'quizzes/question/delete_question.html'
     success_url = reverse_lazy('list_question')
 
 
@@ -74,6 +135,7 @@ def quiz_list(request):
     })
 
 
+@method_decorator(user_passes_test(is_authenticated), name='dispatch')
 class QuizCreateView(LoginRequiredMixin, CreateView):
     model = Quiz
     form_class = QuizForm
@@ -102,15 +164,7 @@ class QuizCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-def get_questions(request):
-    selected_category_id = request.GET.get('category')
-    if selected_category_id:
-        questions = Question.objects.filter(category_id=selected_category_id)
-        data = [{'id': question.id, 'question_text': question.question_text} for question in questions]
-        return JsonResponse(data, safe=False)
-    return JsonResponse([], safe=False)
-
-
+@user_passes_test(is_authenticated)
 def quiz_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     questions = quiz.questions.all()
@@ -132,9 +186,15 @@ def quiz_view(request, quiz_id):
                 if user_answer == correct_answer:
                     score += 1
 
-            # Check if the user's score is higher than the current high score
+            quiz_history = QuizHistory.objects.create()
+            quiz_history.quiz = quiz
+            quiz_history.user = request.user
+            quiz_history.date = datetime.date.today()
+            quiz_history.save()
+
             high_score, _ = HighScore.objects.get_or_create(user=request.user, quiz=quiz)
             best = False
+
             if score > high_score.score:
                 high_score.score = score
                 high_score.save()

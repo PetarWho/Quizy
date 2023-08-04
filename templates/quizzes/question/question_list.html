@@ -2,23 +2,37 @@
 
 {% block content %}
     <div class="container mt-5">
-        <form class="form-inline justify-content-center mb-4">
-            <label class="mr-2" for="categorySelect">Select Category:</label>
-            <select id="categorySelect" class="form-control" onchange="location = this.value;">
-                <option value="{% url 'list_question' %}" {% if not selected_category %}selected{% endif %}>All</option>
-                {% for category in categories %}
-                    <option value="{% url 'list_question' %}?category={{ category.id }}"
-                            {% if selected_category == category.id %}selected{% endif %}>{{ category.name }}</option>
-                {% endfor %}
-            </select>
-        </form>
+        <p class="heading text-center">Questions</p>
+
+        <div class="question-header">
+            {% if user.is_authenticated %}
+                <div class="container-flex">
+                    <a class="btn btn-success" href="{% url 'add_question' %}">Add Question</a>
+                </div>
+            {% endif %}
+            <form class="form-inline justify-content-center mb-4">
+                <label class="mr-2" for="categorySelect">Select Category:</label>
+                <select id="categorySelect" class="form-control" onchange="location = this.value;">
+                    <option value="{% url 'list_question' %}" {% if not selected_category %}selected{% endif %}>All
+                    </option>
+                    {% for category in categories %}
+                        <option value="{% url 'list_question' %}?category={{ category.id }}"
+                                {% if selected_category == category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {% if not page_obj %}
+            <p class="h4 text-center mt-4 mb-4">No have not created any questions yet.</p>
+        {% endif %}
 
         <div class="row">
             {% for question in page_obj %}
                 <div class="col-md-6 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <p class="card-text">{{ question.question_text }}</p>
+                            <p class="card-text bold">{{ question.question_text }}</p>
                             <ul class="list-group">
                                 <li class="list-group-item {% if question.correct_answer_visible %}spoiler{% endif %}">
                                     <span class="text-secondary">a)</span> {{ question.option1 }}
@@ -43,6 +57,14 @@
                                 </span>
                             </div>
                         </div>
+                        {% if user.is_staff or user.id == question.user_id %}
+                            <div class="card-footer text-center">
+                                <a href="{% url 'edit_question' question.pk %}" class="btn btn-primary">Edit</a>
+                                {% if user.is_superuser or user.id == question.user_id %}
+                                    <a href="{% url 'delete_question' question.pk %}" class="btn btn-danger">Delete</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -57,6 +79,9 @@
                     </li>
                     <li class="page-item">
                         <a class="page-link" href="?page=
+
+
+
                                 {{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
                     </li>
                 {% endif %}
@@ -69,6 +94,9 @@
                     {% else %}
                         <li class="page-item">
                             <a class="page-link" href="?page=
+
+
+
                                     {{ i }}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ i }}</a>
                         </li>
                     {% endif %}
@@ -77,10 +105,16 @@
                 {% if page_obj.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="?page=
+
+
+
                                 {{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
                     </li>
                     <li class="page-item">
                         <a class="page-link" href="?page=
+
+
+
                                 {{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Last</a>
                     </li>
                 {% endif %}

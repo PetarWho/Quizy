@@ -20,5 +20,8 @@ class QuizHistory(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name_plural = "Quiz Histories"
+
     def __str__(self):
         return f"Quiz history: {self.user.username}, {self.category} - {self.score} at {self.date}"
