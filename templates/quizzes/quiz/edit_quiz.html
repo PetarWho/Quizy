@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mb-5">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title text-center heading">Edit Quiz</p>
+                        <form method="post" id="quiz-form">
+                            {% csrf_token %}
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.name.id_for_label }}">Quiz Name:</label>
+                                {{ form.name }}
+                                {{ form.name.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.category.id_for_label }}">Category:</label>
+                                {{ form.category }}
+                                {{ form.category.errors }}
+                            </div>
+                            <div class="fieldWrapper">
+                                <label class="custom-form-label" for="{{ form.image_url.id_for_label }}">Image URL:</label>
+                                {{ form.image_url }}
+                                {{ form.image_url.errors }}
+                            </div>
+                            <div class="fieldWrapper" id="question-field-wrapper">
+                                <label class="custom-form-label" for="{{ form.questions.id_for_label }}">Select Questions:</label>
+                                {{ form.questions }}
+                                {{ form.questions.errors }}
+                                <span id="selected-questions-count">Selected Questions: 0</span>
+                            </div>
+                            <div class="d-flex justify-content-center mt-3">
+                                <button type="submit" class="btn btn-primary btn-block">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateSelectedQuestionsCount() {
+            const questionsSelect = document.getElementById("id_questions");
+            const selectedQuestionsCount = questionsSelect.selectedOptions.length;
+            const selectedQuestionsCountElement = document.getElementById("selected-questions-count");
+            selectedQuestionsCountElement.textContent = `Selected Questions: ${selectedQuestionsCount}`;
+        }
+
+        const questionsSelect = document.getElementById("id_questions");
+        questionsSelect.addEventListener("change", updateSelectedQuestionsCount);
+
+        function loadQuestions() {
+            const categoryId = document.getElementById("id_category").value;
+            fetch(`/quizzes/get_questions/?category=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    questionsSelect.innerHTML = ""; // Clear the select options
+                    data.forEach(question => {
+                        const option = document.createElement("option");
+                        option.value = question.id;
+                        option.textContent = question.question_text;
+                        questionsSelect.appendChild(option);
+                    });
+                    updateSelectedQuestionsCount(); // Update selected questions count
+                })
+                .catch(error => console.error("Error fetching questions:", error));
+        }
+
+        const categorySelect = document.getElementById("id_category");
+        categorySelect.addEventListener("change", loadQuestions);
+
+        // Load questions initially for the selected category (if any)
+        loadQuestions();
+    </script>
+{% endblock %}

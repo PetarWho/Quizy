@@ -4,7 +4,7 @@
     <div class="container mt-5">
         <p class="heading text-center">Quizzes</p>
         <div class="question-header">
-            {% if user.is_staff %}
+            {% if user.is_authenticated %}
                 <div class="container-flex">
                     <a class="btn btn-success" href="{% url 'add_quiz' %}">Add Quiz</a>
                 </div>
@@ -26,22 +26,34 @@
 
         <div class="row">
             {% for quiz in page_obj %}
-                <a class="nav-link" href="{% url 'start_quiz' quiz_id=quiz.pk %}">
-                    <div class="col-md-4 mb-4">
-                        <div class="card">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <a class="nav-link" href="{% url 'start_quiz' quiz_id=quiz.pk %}">
                             <div class="card-body">
                                 <p class="card-title h5">{{ quiz.name }} <span
                                         class="text-secondary h6">by</span> {{ quiz.user }}</p>
-                                <img src="{{ quiz.image_url }}" class="card-img-top p-1" alt="Quiz Image">
+                                <img src="{{ quiz.image_url }}" class="card-img-top quiz-img p-1" alt="Quiz Image">
                                 <div class="text-right mt-2">
                                 <span class="badge badge-info">
-                                    {{ quiz.questions.count }} Questions
+                                    {{ quiz.questions.count }} {% if quiz.questions.count == 1 %}Question {% else %}
+                                    Questions {% endif %}
                                 </span>
                                 </div>
                             </div>
+                        </a>
+                        <div class="card-footer text-center">
+                            <a href="{% url 'leaderboard' quiz.pk %}" class="btn btn-primary">Leaderboard</a>
+
+                            {% if user.is_staff or user.id == quiz.user.id %}
+                                <a href="{% url 'edit_quiz' quiz.pk %}" class="btn btn-warning">Edit</a>
+                                {% if user.is_superuser or user.id == quiz.user.id %}
+                                    <a href="{% url 'delete_quiz' quiz.pk %}" class="btn btn-danger">Delete</a>
+                                {% endif %}
+                            {% endif %}
                         </div>
+
                     </div>
-                </a>
+                </div>
             {% endfor %}
         </div>
 
@@ -54,6 +66,12 @@
                     </li>
                     <li class="page-item">
                         <a class="page-link" href="?page=
+
+
+
+
+
+
 
                                 {{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
                     </li>
@@ -68,6 +86,12 @@
                         <li class="page-item">
                             <a class="page-link" href="?page=
 
+
+
+
+
+
+
                                     {{ i }}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ i }}</a>
                         </li>
                     {% endif %}
@@ -77,10 +101,22 @@
                     <li class="page-item">
                         <a class="page-link" href="?page=
 
+
+
+
+
+
+
                                 {{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
                     </li>
                     <li class="page-item">
                         <a class="page-link" href="?page=
+
+
+
+
+
+
 
                                 {{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Last</a>
                     </li>

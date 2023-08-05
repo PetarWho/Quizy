@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center">
+                <h2>No Scores Yet</h2>
+                <p class="h4">Be the first to take the quiz and top the leaderboard!</p>
+                <a href="{% url 'start_quiz' quiz_id %}" class="btn btn-primary mt-3">Start Quiz</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

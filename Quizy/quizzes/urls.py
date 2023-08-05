@@ -15,6 +15,10 @@ urlpatterns = [
     path('q/<int:pk>/delete/', QuestionDeleteView.as_view(), name='delete_question'),
     # Quiz
     path('quiz/add/', QuizCreateView.as_view(), name='add_quiz'),
+    path('quiz/edit/<int:quiz_id>', edit_quiz, name='edit_quiz'),
+    path('quiz/<int:pk>/delete/', QuizDeleteView.as_view(), name='delete_quiz'),
     path('quiz/all/', quiz_list, name='list_quiz'),
     path('quizzing/<int:quiz_id>/', quiz_view, name='start_quiz'),
+    path('get_questions/', get_questions, name='get_questions'),
+    path('quiz/leaderboard/<int:quiz_id>', leaderboard, name='leaderboard'),
 ]

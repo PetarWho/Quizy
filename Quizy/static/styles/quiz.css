@@ -1,0 +1,56 @@
+.quiz-card {
+    height: 350px;
+}
+
+.quiz-img {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+}
+
+.quiz-result-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.leaderboard-container {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.leaderboard-table {
+    display: table;
+    width: 100%;
+}
+
+.leaderboard-row {
+    display: table-row;
+}
+
+.leaderboard-title-row {
+    display: table-row;
+    font-weight: bold;
+}
+
+.leaderboard-cell-title-left,
+.leaderboard-cell-left {
+    display: table-cell;
+    padding: 5px 10px;
+    text-align: left;
+}
+
+.leaderboard-cell-title-right,
+.leaderboard-cell-right {
+    display: table-cell;
+    padding: 5px 10px;
+    text-align: right;
+}
+
+/* Alternate row colors */
+.leaderboard-row.even {
+    background-color: #f2f2f2; /* Light gray for even rows */
+}
+
+.leaderboard-row.odd {
+    background-color: #ffffff; /* White for odd rows */
+}

@@ -3,15 +3,41 @@
 
 {% block content %}
     <div class="text-center">
-        <p class="h2">You Scored <span class="bold">{{ score }}</span> on <span class="bold">{{ quiz }}</span>
+        <p class="h2">You have scored <span class="bold">{{ score }}</span> on <span class="bold">{{ quiz }}</span>
         </p>
         {% if best %}
             <p class="h2 bold color-gold">
                 This is your highest score. Congratulations!
             </p>
         {% endif %}
-        <img style="max-width: 20%; margin-top: 20px;" src="{% static 'img/result.png' %}" alt="result-img">
+
+        <div class="quiz-result-container">
+            <img style="max-width: 20%; margin-top: 20px;" src="{% static 'img/result.png' %}" alt="result-img">
+
+            <div class="mt-2 leaderboard-container">
+                <p class="h4 bold">Quiz Leaderboard</p>
+
+                <div class="leaderboard-table">
+                    <div class="leaderboard-title-row">
+                        <span class="leaderboard-cell-title-left">User</span>
+                        <span class="leaderboard-cell-title-right">Score</span>
+                    </div>
+                    {% for record in leaderboard %}
+                        <div class="leaderboard-row {% cycle 'even' 'odd' %}">
+                            <span class="leaderboard-cell-left">{{ record.user.username }}</span>
+                            <span class="leaderboard-cell-right">{{ record.score }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
 
     </div>
+    <div class="text-center mt-5">
+        <a href="{% url 'list_quiz' %}" class="btn btn-secondary bold">Other quizzes ></a>
+    </div>
+
+
 
 {% endblock %}

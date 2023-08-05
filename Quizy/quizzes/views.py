@@ -1,17 +1,21 @@
-import datetime
+from functools import wraps
 
+from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
+from django.utils import timezone
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import CreateView, DeleteView
+from django.views.generic import CreateView, DeleteView, UpdateView
 
 from .models import Category, Question, Quiz
 from .forms import CategoryForm, QuestionForm, QuizForm
 from ..common.models import QuizHistory, HighScore
-from ..core.view_decorators import is_superuser, is_staff, is_authenticated, is_staff_or_creator_question
+from ..core.view_decorators import is_superuser, is_staff, is_authenticated, is_staff_or_creator_question, \
+    is_staff_or_creator_quiz, is_superuser_or_creator_quiz
 
 
 def category_list(request):
@@ -139,7 +143,7 @@ def quiz_list(request):
 class QuizCreateView(LoginRequiredMixin, CreateView):
     model = Quiz
     form_class = QuizForm
-    template_name = 'quizzes/quiz/add_quiz.html'
+    template_name = 'quizzes/quiz/edit_quiz.html'
     success_url = reverse_lazy('list_quiz')
 
     def get_form_kwargs(self):
@@ -150,35 +154,75 @@ class QuizCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        # Create the quiz instance
         quiz = form.save(commit=False)
-        # Associate the user with the quiz
         quiz.user = self.request.user
-        # Save the quiz instance
         quiz.save()
 
-        # Add the selected questions to the quiz
         selected_questions = form.cleaned_data['questions']
         quiz.questions.set(selected_questions)
 
         return super().form_valid(form)
 
 
+def user_can_edit_quiz(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, quiz_id, *args, **kwargs):
+        quiz = Quiz.objects.get(pk=quiz_id)
+
+        # Check if the user is the creator of the quiz or a staff member
+        if request.user.id == quiz.user.id or request.user.is_staff:
+            return view_func(request, quiz_id, *args, **kwargs)
+        else:
+            raise PermissionDenied
+
+    return _wrapped_view
+
+
+def edit_quiz(request, quiz_id):
+    try:
+        quiz = Quiz.objects.get(pk=quiz_id, user_id=request.user.id)
+    except Quiz.DoesNotExist:
+        return redirect('list_quiz')
+    categories = Category.objects.all()
+    if request.method == 'POST':
+        form = QuizForm(request.POST, instance=quiz, categories=categories)
+        if form.is_valid():
+            form.save()
+            selected_questions = form.cleaned_data['questions']
+            quiz.questions.set(selected_questions)
+            return redirect('list_quiz')
+
+    else:
+        form = QuizForm(instance=quiz, categories=categories)
+
+    return render(request, 'quizzes/quiz/edit_quiz.html', {'form': form})
+
+
+class IsSuperuserOrCreatorQuizMixin(UserPassesTestMixin):
+    def test_func(self):
+        quiz_id = self.kwargs['pk']
+        return is_superuser_or_creator_quiz(self.request.user, quiz_id)
+
+
+class QuizDeleteView(IsSuperuserOrCreatorQuizMixin, DeleteView):
+    model = Quiz
+    template_name = 'quizzes/quiz/delete_quiz.html'
+    success_url = reverse_lazy('list_quiz')
+
+
 @user_passes_test(is_authenticated)
 def quiz_view(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     questions = quiz.questions.all()
-    user_answers = []  # List to store the user's answers for each question
+    user_answers = []
 
     if request.method == 'POST':
         for question in questions:
             question_id = question.id
             user_answer = request.POST.get(f'{question_id}_user_answer')
 
-            # Append the user's answer to the list
             user_answers.append(user_answer)
 
-        # If all questions are answered, calculate the score
         if len(user_answers) == questions.count():
             score = 0
             for question, user_answer in zip(questions, user_answers):
@@ -186,12 +230,7 @@ def quiz_view(request, quiz_id):
                 if user_answer == correct_answer:
                     score += 1
 
-            quiz_history = QuizHistory.objects.create()
-            quiz_history.quiz = quiz
-            quiz_history.user = request.user
-            quiz_history.date = datetime.date.today()
-            quiz_history.save()
-
+            QuizHistory.objects.create(quiz=quiz, user=request.user, date=timezone.now())
             high_score, _ = HighScore.objects.get_or_create(user=request.user, quiz=quiz)
             best = False
 
@@ -200,7 +239,32 @@ def quiz_view(request, quiz_id):
                 high_score.save()
                 best = True
 
-            # Display the score
-            return render(request, 'quizzes/quiz/quiz_result.html', {'score': score, 'quiz': quiz, 'best': best})
+            leaderboard_scores = HighScore.objects.filter(quiz_id=quiz.id).order_by('-score')
+
+            return render(request, 'quizzes/quiz/quiz_result.html',
+                          {'score': score, 'quiz': quiz, 'best': best, 'leaderboard': leaderboard_scores})
 
     return render(request, 'quizzes/quiz/quizzing.html', {'questions': questions, 'quiz': quiz})
+
+
+def get_questions(request):
+    selected_category_id = request.GET.get('category')
+    if selected_category_id:
+        questions = Question.objects.filter(category_id=selected_category_id)
+        data = [{'id': question.id, 'question_text': question.question_text} for question in questions]
+        return JsonResponse(data, safe=False)
+    return JsonResponse([], safe=False)
+
+
+def leaderboard(request, quiz_id):
+    try:
+        highscore = HighScore.objects.get(user_id=request.user.id, quiz_id=quiz_id)
+    except HighScore.DoesNotExist:
+        return render(request, 'quizzes/quiz/no-leaderboard.html', {'quiz_id': quiz_id})
+
+    score = highscore.score
+
+    leaderboard_scores = HighScore.objects.filter(quiz_id=quiz_id).order_by('-score')
+
+    return render(request, 'quizzes/quiz/quiz_result.html',
+                  {'score': score, 'quiz': highscore.quiz, 'best': False, 'leaderboard': leaderboard_scores})
