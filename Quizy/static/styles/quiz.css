@@ -63,3 +63,7 @@
 .a-text{
     color:black;
 }
+
+.space-between{
+    justify-content: space-between;
+}

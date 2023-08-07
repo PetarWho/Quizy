@@ -7,6 +7,15 @@
                 <div class="card">
                     <div class="card-body">
                         <p class="card-title text-center heading">Add Category</p>
+                        {% if messages.errors %}
+                            <div class="alert alert-danger">
+                                <ul>
+                                    {% for message in messages %}
+                                        <li>{{ message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                         <form method="post">
                             {% csrf_token %}
                             <div class="fieldWrapper">

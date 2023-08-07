@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container mt-5">
+        {% include 'common/alerts.html' %}
+
+
+    <div class="container">
         <p class="heading text-center">Categories</p>
         {% if user.is_staff %}
             <div class="container-flex mt-2 mb-4">
-                <a class="btn btn-success" href="{% url 'add_quiz' %}">Add Category</a>
+                <a class="btn btn-success" href="{% url 'add_category' %}">Add Category</a>
             </div>
         {% endif %}
         {% if not page_obj %}

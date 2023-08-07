@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container mt-5">
+    {% include 'common/alerts.html' %}
+
+
+    <div class="container">
         <p class="heading text-center">Quizzes</p>
         <div class="question-header">
             {% if user.is_authenticated %}
@@ -65,15 +68,7 @@
                            href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}">First</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page=
-
-
-
-
-
-
-
-                                {{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
                     </li>
                 {% endif %}
 
@@ -85,6 +80,9 @@
                     {% else %}
                         <li class="page-item">
                             <a class="page-link" href="?page=
+
+
+
 
 
 
@@ -107,10 +105,16 @@
 
 
 
+
+
+
                                 {{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
                     </li>
                     <li class="page-item">
                         <a class="page-link" href="?page=
+
+
+
 
 
 

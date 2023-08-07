@@ -1,8 +1,8 @@
 from functools import wraps
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.utils import timezone
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,6 +13,8 @@ from .models import Category, Question, Quiz, Score
 from .forms import CategoryForm, QuestionForm, QuizForm
 from ..common.models import QuizHistory, HighScore
 from ..core.view_decorators import is_superuser, is_staff, is_authenticated, is_superuser_or_creator_quiz
+from django.contrib import messages
+from django.urls import reverse
 
 
 def category_list(request):
@@ -25,22 +27,40 @@ def category_list(request):
     return render(request, 'quizzes/category/category_list.html', {'page_obj': page_obj})
 
 
-@method_decorator(user_passes_test(is_staff), name='dispatch')
 class CategoryCreateView(LoginRequiredMixin, CreateView):
     model = Category
     form_class = CategoryForm
     template_name = 'quizzes/category/add_category.html'
     success_url = reverse_lazy('list_category')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not is_staff(request.user):
+            messages.error(request, "You are not allowed to add a category.", extra_tags='danger')
+            return HttpResponseRedirect(reverse('list_category'))
+        return super().dispatch(request, *args, **kwargs)
 
-@user_passes_test(is_staff)
+    def form_valid(self, form):
+        try:
+            if form.is_valid():
+                messages.success(self.request, "Category created successfully.", extra_tags='success')
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, f"An error occurred: {str(e)}")
+            return HttpResponseRedirect(self.get_success_url())
+
+
 def edit_category(request, category_id):
     category = get_object_or_404(Category, pk=category_id)
+
+    if not request.user.has_perm('change_category', category):
+        messages.error(request, "You are not allowed to edit this category.", extra_tags='danger')
+        return redirect('list_category')
 
     if request.method == 'POST':
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            messages.success(request, "Category updated successfully.")
             return redirect('list_category')
     else:
         form = CategoryForm(instance=category)
@@ -48,11 +68,21 @@ def edit_category(request, category_id):
     return render(request, 'quizzes/category/edit_category.html', {'form': form})
 
 
-@method_decorator(user_passes_test(is_superuser), name='dispatch')
 class CategoryDeleteView(DeleteView):
     model = Category
     template_name = 'quizzes/category/delete_category.html'
     success_url = reverse_lazy('list_category')
+
+    def post(self, request, *args, **kwargs):
+        success_message = "Category deleted successfully."
+        messages.success(self.request, success_message, extra_tags='success')
+        return super().post(request, *args, **kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.has_perm('delete_category', self.get_object()):
+            messages.error(request, "You are not allowed to delete categories.", extra_tags='danger')
+            return redirect('list_category')
+        return super().dispatch(request, *args, **kwargs)
 
 
 @user_passes_test(is_authenticated)
@@ -87,21 +117,34 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('list_question')
 
     def form_valid(self, form):
-        question = form.save(commit=False)
-        question.user_id = self.request.user.id
-        question.save()
-        return super().form_valid(form)
+        try:
+            question = form.save(commit=False)
+            question.user_id = self.request.user.id
+            question.save()
+
+            messages.success(self.request, "Question created successfully.", extra_tags='success')
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, f"An error occurred: {str(e)}")
+            return HttpResponseRedirect(self.get_success_url())
 
 
 def edit_question(request, question_id):
     try:
-        question = Question.objects.get(pk=question_id, user_id=request.user.id)
-    except Question.DoesNotExist:
+        question = Question.objects.get(pk=question_id)
+        if not request.user.is_superuser:
+            if question.user_id != request.user.id:
+                messages.error(request, "You can only edit questions you've created.", extra_tags='danger')
+                return redirect('list_question')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}", extra_tags='danger')
         return redirect('list_question')
+
     if request.method == 'POST':
         form = QuestionForm(request.POST, instance=question)
         if form.is_valid():
             form.save()
+            messages.success(request, "Question updated successfully.", extra_tags='success')
             return redirect('list_question')
     else:
         form = QuestionForm(instance=question)
@@ -109,16 +152,29 @@ def edit_question(request, question_id):
     return render(request, 'quizzes/question/edit_question.html', {'form': form})
 
 
-@method_decorator(user_passes_test(is_superuser), name='dispatch')
 class QuestionDeleteView(DeleteView):
     model = Question
     template_name = 'quizzes/question/delete_question.html'
     success_url = reverse_lazy('list_question')
 
+    def dispatch(self, request, *args, **kwargs):
+        question = self.get_object()
+
+        if not (request.user.is_superuser or question.user_id == request.user.id):
+            messages.error(request, "You are not allowed to delete this question.", extra_tags='danger')
+            return redirect('list_question')
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        success_message = "Question deleted successfully."
+        messages.success(self.request, success_message, extra_tags='success')
+        return super().post(request, *args, **kwargs)
+
 
 def quiz_list(request):
     selected_category = request.GET.get('category')
-    quizzes = Quiz.objects.all()
+    quizzes = Quiz.objects.all().order_by('-pk')
 
     if selected_category:
         quizzes = quizzes.filter(category_id=selected_category)
@@ -150,14 +206,19 @@ class QuizCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        quiz = form.save(commit=False)
-        quiz.user = self.request.user
-        quiz.save()
+        try:
+            quiz = form.save(commit=False)
+            quiz.user = self.request.user
+            quiz.save()
 
-        selected_questions = form.cleaned_data['questions']
-        quiz.questions.set(selected_questions)
+            selected_questions = form.cleaned_data['questions']
+            quiz.questions.set(selected_questions)
 
-        return super().form_valid(form)
+            messages.success(self.request, "Quiz created successfully.", extra_tags='success')
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, f"An error occurred: {str(e)}")
+            return HttpResponseRedirect(self.get_success_url())
 
 
 def user_can_edit_quiz(view_func):
@@ -175,16 +236,20 @@ def user_can_edit_quiz(view_func):
 
 def edit_quiz(request, quiz_id):
     try:
-        quiz = Quiz.objects.get(pk=quiz_id, user_id=request.user.id)
+        quiz = Quiz.objects.get(pk=quiz_id)
     except Quiz.DoesNotExist:
         return redirect('list_quiz')
     categories = Category.objects.all()
+    if quiz.user != request.user:
+        messages.error(request, "You can only edit quizzes you've created.", extra_tags='danger')
+        return redirect('list_quiz')
     if request.method == 'POST':
         form = QuizForm(request.POST, instance=quiz, categories=categories)
         if form.is_valid():
             form.save()
             selected_questions = form.cleaned_data['questions']
             quiz.questions.set(selected_questions)
+            messages.success(request, "Quiz updated successfully.", extra_tags='success')
             return redirect('list_quiz')
 
     else:
@@ -203,6 +268,28 @@ class QuizDeleteView(IsSuperuserOrCreatorQuizMixin, DeleteView):
     model = Quiz
     template_name = 'quizzes/quiz/delete_quiz.html'
     success_url = reverse_lazy('list_quiz')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.test_func():
+            messages.error(request, "You are not allowed to delete this quiz.", extra_tags='danger')
+            return HttpResponseRedirect(reverse('list_quiz'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        quiz = self.get_object()
+        success_message = "Quiz deleted successfully."
+        self.object = quiz
+
+        try:
+            self.object.delete()
+            messages.success(request, success_message, extra_tags='success')
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}", extra_tags='danger')
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return self.success_url
 
 
 @user_passes_test(is_authenticated)

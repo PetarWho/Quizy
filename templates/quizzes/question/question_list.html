@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container mt-5">
+    {% include 'common/alerts.html' %}
+
+
+    <div class="container">
         <p class="heading text-center">Questions</p>
 
         <div class="question-header">
@@ -51,10 +54,15 @@
                                 <span class="spoiler-text form-control">Correct Answer: <span class="font-weight-bold">Hover to see</span></span>
                                 <span class="spoiler-content form-control">{{ question.correct_answer }}</span>
                             </div>
-                            <div class="text-right mt-2">
+
+                            <div class="d-flex space-between mt-3">
+                                <span class="badge" style="text-align: left !important;">
+                                    by: {{ question.user }}
+                                </span>
                                 <span class="badge badge-info">
                                     Category: {{ question.category.name }}
                                 </span>
+
                             </div>
                         </div>
                         {% if user.is_staff or user.id == question.user_id %}
