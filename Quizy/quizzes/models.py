@@ -39,7 +39,7 @@ class Quiz(models.Model):
         verbose_name_plural = "Quizzes"
 
     def __str__(self):
-        return f"{self.category.name} quiz by {self.user}"
+        return f"{self.name} quiz by {self.user}"
 
 
 class Score(models.Model):

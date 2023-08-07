@@ -1,5 +1,4 @@
 from functools import wraps
-
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.utils import timezone
@@ -9,13 +8,11 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import CreateView, DeleteView, UpdateView
-
-from .models import Category, Question, Quiz
+from django.views.generic import CreateView, DeleteView
+from .models import Category, Question, Quiz, Score
 from .forms import CategoryForm, QuestionForm, QuizForm
 from ..common.models import QuizHistory, HighScore
-from ..core.view_decorators import is_superuser, is_staff, is_authenticated, is_staff_or_creator_question, \
-    is_staff_or_creator_quiz, is_superuser_or_creator_quiz
+from ..core.view_decorators import is_superuser, is_staff, is_authenticated, is_superuser_or_creator_quiz
 
 
 def category_list(request):
@@ -148,7 +145,6 @@ class QuizCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Pass the category choices to the form
         categories = Category.objects.all()
         kwargs['categories'] = categories
         return kwargs
@@ -169,7 +165,6 @@ def user_can_edit_quiz(view_func):
     def _wrapped_view(request, quiz_id, *args, **kwargs):
         quiz = Quiz.objects.get(pk=quiz_id)
 
-        # Check if the user is the creator of the quiz or a staff member
         if request.user.id == quiz.user.id or request.user.is_staff:
             return view_func(request, quiz_id, *args, **kwargs)
         else:
@@ -230,7 +225,9 @@ def quiz_view(request, quiz_id):
                 if user_answer == correct_answer:
                     score += 1
 
-            QuizHistory.objects.create(quiz=quiz, user=request.user, date=timezone.now())
+            QuizHistory.objects.create(quiz=quiz, user=request.user, score=score, date=timezone.now())
+            Score.objects.create(score=score, user_id=request.user.id, quiz_id=quiz_id)
+
             high_score, _ = HighScore.objects.get_or_create(user=request.user, quiz=quiz)
             best = False
 

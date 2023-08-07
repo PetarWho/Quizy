@@ -24,7 +24,7 @@
         </div>
 
         {% if not page_obj %}
-            <p class="h4 text-center mt-4 mb-4">No have not created any questions yet.</p>
+            <p class="h4 text-center mt-4 mb-4">You have not created any questions yet.</p>
         {% endif %}
 
         <div class="row">
@@ -59,7 +59,7 @@
                         </div>
                         {% if user.is_staff or user.id == question.user_id %}
                             <div class="card-footer text-center">
-                                <a href="{% url 'edit_question' question.pk %}" class="btn btn-primary">Edit</a>
+                                <a href="{% url 'edit_question' question.pk %}" class="btn btn-warning">Edit</a>
                                 {% if user.is_superuser or user.id == question.user_id %}
                                     <a href="{% url 'delete_question' question.pk %}" class="btn btn-danger">Delete</a>
                                 {% endif %}

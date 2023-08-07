@@ -21,17 +21,17 @@
             </form>
         </div>
         {% if not page_obj %}
-            <p class="h4 text-center mt-4 mb-4">No questions in this category yet.</p>
+            <p class="h4 text-center mt-4 mb-4">No quizzes in this category yet.</p>
         {% endif %}
 
         <div class="row">
             {% for quiz in page_obj %}
                 <div class="col-md-4 mb-4">
                     <div class="card">
-                        <a class="nav-link" href="{% url 'start_quiz' quiz_id=quiz.pk %}">
+                        <a class="nav-link card-hover" href="{% url 'start_quiz' quiz_id=quiz.pk %}">
                             <div class="card-body">
-                                <p class="card-title h5">{{ quiz.name }} <span
-                                        class="text-secondary h6">by</span> {{ quiz.user }}</p>
+                                <p class="card-title h5 a-text">{{ quiz.name }} <span
+                                        class="text-secondary h6 a-text">by</span> {{ quiz.user }}</p>
                                 <img src="{{ quiz.image_url }}" class="card-img-top quiz-img p-1" alt="Quiz Image">
                                 <div class="text-right mt-2">
                                 <span class="badge badge-info">

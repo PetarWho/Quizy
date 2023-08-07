@@ -54,3 +54,12 @@
 .leaderboard-row.odd {
     background-color: #ffffff; /* White for odd rows */
 }
+
+.card-hover:hover{
+    background-color: rgba(113, 113, 113, 0.2);
+    transition-duration: 0.5s;
+}
+
+.a-text{
+    color:black;
+}
