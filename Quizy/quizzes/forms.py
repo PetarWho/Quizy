@@ -17,6 +17,15 @@ class CategoryForm(forms.ModelForm):
 
 
 class QuestionForm(forms.ModelForm):
+    CHOICES = [
+        ('option1', 'A)'),
+        ('option2', 'B)'),
+        ('option3', 'C)'),
+        ('option4', 'D)'),
+    ]
+
+    correct_answer = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
+
     class Meta:
         model = Question
         fields = ['category', 'question_text', 'option1', 'option2', 'option3', 'option4', 'correct_answer']
@@ -26,8 +35,10 @@ class QuestionForm(forms.ModelForm):
 
         for field_name in self.fields:
             field = self.fields[field_name]
-            if not isinstance(field.widget, forms.CheckboxInput):
+            if not isinstance(field.widget, forms.RadioSelect):
                 field.widget.attrs['class'] = 'form-control'
+            else:
+                field.widget.attrs['class'] = 'ml-1'
 
 
 class QuizForm(forms.ModelForm):

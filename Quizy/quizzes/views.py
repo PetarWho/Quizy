@@ -117,19 +117,37 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('list_question')
 
     def form_valid(self, form):
+        flag = True
         try:
             question = form.save(commit=False)
             question.user_id = self.request.user.id
+
+            correct_answer_option = self.request.POST.get('correct_answer')
+
+            if flag:
+                if correct_answer_option == 'option1':
+                    question.correct_answer = question.option1
+                elif correct_answer_option == 'option2':
+                    question.correct_answer = question.option2
+                elif correct_answer_option == 'option3':
+                    question.correct_answer = question.option3
+                elif correct_answer_option == 'option4':
+                    question.correct_answer = question.option4
+
+                flag = False
+
             question.save()
 
             messages.success(self.request, "Question created successfully.", extra_tags='success')
-            return super().form_valid(form)
+            return redirect('list_question')
         except Exception as e:
+            print(str(e))
             messages.error(self.request, f"An error occurred: {str(e)}")
             return HttpResponseRedirect(self.get_success_url())
 
 
 def edit_question(request, question_id):
+    flag = True
     try:
         question = Question.objects.get(pk=question_id)
         if not request.user.is_superuser:
@@ -143,6 +161,19 @@ def edit_question(request, question_id):
     if request.method == 'POST':
         form = QuestionForm(request.POST, instance=question)
         if form.is_valid():
+            correct_answer_option = request.POST.get('correct_answer')
+            if flag:
+                if correct_answer_option == 'option1':
+                    question.correct_answer = question.option1
+                elif correct_answer_option == 'option2':
+                    question.correct_answer = question.option2
+                elif correct_answer_option == 'option3':
+                    question.correct_answer = question.option3
+                elif correct_answer_option == 'option4':
+                    question.correct_answer = question.option4
+
+                flag = False
+
             form.save()
             messages.success(request, "Question updated successfully.", extra_tags='success')
             return redirect('list_question')
