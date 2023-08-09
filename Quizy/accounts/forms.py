@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 
 from .models import AppUser
 
@@ -22,7 +21,6 @@ class RegisterUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Adding custom classes to each field using a loop
         for field_name in self.fields:
             field = self.fields[field_name]
             if not isinstance(field.widget, forms.CheckboxInput):
@@ -42,3 +40,16 @@ class RegisterUserForm(forms.ModelForm):
             user.save()
         return user
 
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = AppUser
+        fields = ['first_name', 'last_name', 'age', 'email', 'photo']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name in self.fields:
+            field = self.fields[field_name]
+            if not isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-control col-md-7 m-0 mb-3'

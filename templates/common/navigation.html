@@ -26,6 +26,9 @@
         <ul class="navbar-nav">
             {% if user.is_authenticated %}
                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'user_profile' %}"><img style="width: 30px; height: 30px; object-fit: cover" src="{{ user.photo }}" alt="profile"></a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                 </li>
             {% else %}

@@ -1,11 +1,14 @@
 from django.contrib.auth import logout, login
-from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
 from django.views import View
-from Quizy.accounts.forms import RegisterUserForm
+from Quizy.accounts.forms import RegisterUserForm, UserProfileForm
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+
+from Quizy.common.models import QuizHistory
 
 
 def is_anonymous(user):
@@ -57,3 +60,35 @@ class LogoutView(View):
     def get(self, request, *args, **kwargs):
         logout(request)
         return redirect('index')
+
+
+@login_required
+def user_profile(request):
+    user = request.user
+    form = UserProfileForm(instance=user)
+    history = QuizHistory.objects.filter(user_id=user.id).order_by('-date')
+    best = history[:10]
+
+    context = {
+        'form': form,
+        'best': best,
+        'count': history.count()
+    }
+    return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+def edit_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile')
+    else:
+        form = UserProfileForm(instance=user)
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/edit_profile.html', context)
