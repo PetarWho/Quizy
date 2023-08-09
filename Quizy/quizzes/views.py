@@ -1,5 +1,6 @@
 from functools import wraps
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth.decorators import user_passes_test, permission_required
@@ -205,10 +206,14 @@ class QuestionDeleteView(DeleteView):
 
 def quiz_list(request):
     selected_category = request.GET.get('category')
+    search_query = request.GET.get('search')
     quizzes = Quiz.objects.all().order_by('-pk')
 
     if selected_category:
         quizzes = quizzes.filter(category_id=selected_category)
+
+    if search_query:
+        quizzes = quizzes.filter(Q(name__icontains=search_query) | Q(user__username__icontains=search_query))
 
     paginator = Paginator(quizzes, 6)
     page_number = request.GET.get('page')
@@ -220,6 +225,7 @@ def quiz_list(request):
         'page_obj': page_obj,
         'categories': categories,
         'selected_category': int(selected_category) if selected_category else None,
+        'search_query': search_query,
     })
 
 

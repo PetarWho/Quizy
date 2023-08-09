@@ -63,7 +63,7 @@
                                                 </div>
                                             </div>
                                             <div class="bio-desk">
-                                                <a href="{% url 'list_quiz' %}" class="h5 red" style="text-decoration: none; color:indianred;">{{ item.quiz.name }}</a>
+                                                <a href="{% url 'list_quiz' %}?search={{ item.quiz.name }}" class="h5 red" style="text-decoration: none; color:indianred;">{{ item.quiz.name }}</a>
                                                 <p class="m-0">Score : {{ item.score }}</p>
                                                 <p class="m-0">{{ item.date }}</p>
                                             </div>
