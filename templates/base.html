@@ -22,6 +22,21 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
-<footer class="footer">
+<footer class="bg-dark text-white py-4 footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <p>Quizy 2023</p>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-unstyled d-flex justify-content-end">
+                    <li class="mx-2"><a class="text-white" href="{% url 'list_question' %}">Questions</a></li>
+                    <li class="mx-2"><a class="text-white" href="{% url 'list_category' %}">Categories</a></li>
+                    <li class="mx-2"><a class="text-white" href="{% url 'list_quiz' %}">Quizzes</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </footer>
+
 </html>
